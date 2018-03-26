@@ -3828,6 +3828,7 @@ function validateOptions(userOptions) {
   helper.ensureFlagExists('ignoreCdata', options);
   helper.ensureFlagExists('ignoreDoctype', options);
   helper.ensureFlagExists('compact', options);
+  helper.ensureFlagExists('alwaysAttributes', options);
   helper.ensureFlagExists('alwaysChildren', options);
   helper.ensureFlagExists('addParent', options);
   helper.ensureFlagExists('trim', options);
@@ -3920,7 +3921,7 @@ function addField(type, value) {
         }
       }
       element[options.nameKey] = 'instructionNameFn' in options ? options.instructionNameFn(key, value, currentElement) : key;
-      if (options.instructionHasAttributes) {
+      if (options.instructionHasAttributes || options.alwaysAttributes) {
         element[options.attributesKey] = value[key][options.attributesKey];
         if ('instructionFn' in options) {
           element[options.attributesKey] = options.instructionFn(element[options.attributesKey], key, currentElement);
@@ -3980,7 +3981,7 @@ function onInstruction(instruction) {
       return;
     }
     currentElement[options.declarationKey] = {};
-    if (Object.keys(attributes).length) {
+    if (Object.keys(attributes).length || options.alwaysAttributes) {
       currentElement[options.declarationKey][options.attributesKey] = attributes;
     }
     if (options.addParent) {
@@ -3994,7 +3995,7 @@ function onInstruction(instruction) {
       instruction.body = instruction.body.trim();
     }
     var value = {};
-    if (options.instructionHasAttributes && Object.keys(attributes).length) {
+    if (options.instructionHasAttributes && Object.keys(attributes).length || options.alwaysAttributes) {
       value[instruction.name] = {};
       value[instruction.name][options.attributesKey] = attributes;
     } else {
@@ -4016,7 +4017,7 @@ function onStartElement(name, attributes) {
   }
   if (options.compact) {
     element = {};
-    if (!options.ignoreAttributes && attributes && Object.keys(attributes).length) {
+    if (!options.ignoreAttributes && attributes && Object.keys(attributes).length || options.alwaysAttributes) {
       element[options.attributesKey] = {};
       var key;
       for (key in attributes) {
